@@ -2,9 +2,9 @@
 <html> <head>
 <title>Course Schedule</title>
   <link rel="stylesheet" type="text/css" href="static/css/syllabus.css"
-   media="screen"/> 
+   media="screen"/>
   <link rel="stylesheet" type="text/css" href="static/css/syllabus-print.css"
-   media="print"/> 
+   media="print"/>
 
 </head>
 
@@ -13,17 +13,24 @@
 
 <table class="class-schedule">
   {% for entry in session.schedule %}
-  {% if loop.index is divisibleby 2 %}
-  <tr class="even">
+  <!--Use flask to call a python function to compare the current date from arrow and the week date -->
+  {% if compare_date((date),(inc_date(entry.begin,entry.week))) %}
+  <!--if true we specify the current class to paint a purple color, otherwise same even odd color scheme-->
+  <tr class="current">
   {% else %}
-  <tr class="odd">
-  {% endif %}	   
-    <td class="week">{{ entry.week }}</td>
+    {% if loop.index is divisibleby 2 %}
+    <tr class="even">
+    {% else %}
+    <tr class="odd">
+    {% endif %}
+  {% endif %}
+    <!-- Use flask to call a python function to increment the begin date by entry week -->
+    <td class="week">{{ entry.week }}<p>{{(inc_date(entry.begin,entry.week) | fmtdate) }}<p></td>
     <td class="topic">{{ entry.topic }}</td>
     <td class="project">{{ entry.project}}</td>
   </tr>
   {% endfor %}
-  
+
 
 
 

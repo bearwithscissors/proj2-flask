@@ -12,7 +12,7 @@ from flask import url_for
 import json
 import logging
 
-# Date handling 
+# Date handling
 import arrow # Replacement for datetime, based on moment.js
 import datetime # But we still need time
 from dateutil import tz  # For interpreting local times
@@ -57,17 +57,63 @@ def page_not_found(error):
 #
 #################
 
+#
+@app.context_processor
+def the_date():
+    '''
+    Get the current date
+    '''
+    current = arrow.utcnow()
+    return dict(date=current)
+
+@app.context_processor
+def compare_date():
+    '''
+    pass compare_date as a function to flask
+    '''
+    def compare_date(firstDate, secondDate):
+        '''
+        Compare two date arguments passed in the html
+        '''
+        firstDate = arrow.get( firstDate )
+        secondDate = arrow.get( secondDate)
+        if firstDate.week == secondDate.week:
+            return True
+        else:
+            return False
+    return dict(compare_date=compare_date)
+
+
 @app.template_filter( 'fmtdate' )
 def format_arrow_date( date ):
-    try: 
+    try:
         normal = arrow.get( date )
         return normal.format("ddd MM/DD/YYYY")
     except:
         return "(bad date)"
 
+@app.context_processor
+def inc_date():
+    '''
+    Pass inc_date as a function to flask
+    '''
+    def increment_date( date, n ):
+        '''
+        Takes a date and an integer argument and increments
+        the the date by n weeks
+        '''
+        try:
+            i = int(n)
+            i -= 1
+            normal = arrow.get(date)
+            return normal.replace(weeks=+i)
+        except:
+            return "(b-bad date)"
+    return dict(inc_date=increment_date)
+
 
 #############
-#    
+#
 # Set up to run from cgi-bin script, from
 # gunicorn, or stand-alone.
 #
@@ -77,4 +123,3 @@ app.logger.setLevel(logging.DEBUG)
 if __name__ == "__main__":
     print("Opening for global access on port {}".format(CONFIG.PORT))
     app.run(port=CONFIG.PORT, host="0.0.0.0")
-
